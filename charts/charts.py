@@ -107,3 +107,63 @@ def chart_dashboard(df: pd.DataFrame) -> alt.Chart:
     )
 
     return alt.vconcat(line, hist).resolve_scale(color="independent")
+
+################# temps by month #########################
+
+def chart_temp_extr(df: pd.DataFrame) -> alt.Chart:
+    
+    month_order = ["Jan","Feb","Mar","Apr","May","Jun",
+                   "Jul","Aug","Sep","Oct","Nov","Dec"]
+    
+    years = ["2012","2013","2014","2015", "2016"]
+    
+    # temp in months as years increase: color becomes lighter
+    q = float(df["temp_max"].quantile(1))
+    df2 = df.copy()
+    df2["extreme"] = df2["temp_max"] > q
+    
+    base = (
+        alt.Chart(df2)
+        .mark_point(filled=True, size=35)
+        .encode(
+            x=alt.X("month_name:N", title="Month", sort=month_order),
+            y=alt.Y("temp_max:Q", title="Monthly temperatures (°C)"),
+            color=alt.Color("year:O", scale=alt.Scale(scheme='viridis'),title="Year"),
+            tooltip=[alt.Tooltip("date:T"), alt.Tooltip("temp_max:Q", format=".1f"),alt.Tooltip("year:O")],
+        )
+        .properties(height=320)
+    )
+
+    rule = alt.Chart(pd.DataFrame({"q": [q]})).mark_rule(strokeDash=[6, 4]).encode(y="q:Q")
+    return base + rule
+
+###################### exploration chart ###################
+
+def chart_weather_explore(df: pd.DataFrame) -> alt.Chart:
+    month_order = ["Jan","Feb","Mar","Apr","May","Jun",
+                   "Jul","Aug","Sep","Oct","Nov","Dec"]
+    
+    return (
+        alt.Chart(df)
+        .transform_aggregate(
+            count="count()",
+            groupby=["month_name", "weather"]
+        )
+        .transform_window(
+            rank="rank()",
+            sort=[alt.SortField("count", order="descending")],
+            groupby=["month_name"]
+        )
+        .mark_line(point=True)
+        .encode(
+            x=alt.X("month_name:N", title="Month", sort=month_order),
+            y=alt.Y("rank:O", title="Frequency Rank", sort="descending"),
+            color=alt.Color("weather:N", title="Weather Type").scale(scheme="category10"),
+            tooltip=["weather", "month_name", "rank:O", "count:Q"]
+        )
+        .properties(
+            title="Ranking of Weather Frequency by Month",
+            width=600,
+            height=320
+        )
+    )
