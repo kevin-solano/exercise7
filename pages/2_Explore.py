@@ -15,10 +15,9 @@ st.write("- Filter to one weather type (e.g., `sun`, `rain`)—does the temperat
 st.write("- Brush a specific year—do extremes cluster in particular periods?")
 st.write("- Compare histogram shape across weather types—what changes most: center, spread, or tails?")
 
-
 st.altair_chart(chart_weather_explore(df), use_container_width=True)
 
 st.markdown("**Guided prompts:**")
-st.write("- Filter to one weather type (e.g., `sun`, `rain`)—does the temperature distribution shift?")
-st.write("- Brush a specific year—do extremes cluster in particular periods?")
-st.write("- Compare histogram shape across weather types—what changes most: center, spread, or tails?")
+st.write("- Filter to one weather type (e.g., `sun`, `rain`)—does the wind distribution shift?")
+st.write("- Brush a specific year—do extreme wind levels cluster during particular periods?")
+st.write("- Compare the wind histogram shape across weather types—what changes most?")

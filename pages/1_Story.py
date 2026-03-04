@@ -40,7 +40,6 @@ st.write("We wish to test a plausible explanation: are the warmest days also the
 st.altair_chart(chart_explain_precip_vs_temp(df), use_container_width=True)
 st.caption("Takeaway: The relationship is noisy — precipitation alone does not explain extreme heat, motivating more fine-grained exploration.")
 
-
 st.header("5) Montly Temperatures, as the years go by")
 st.write("Here we highlight the monthly temperatures of the year in Seattle")
 st.altair_chart(chart_temp_extr(df), use_container_width=True)

@@ -114,9 +114,7 @@ def chart_temp_extr(df: pd.DataFrame) -> alt.Chart:
     
     month_order = ["Jan","Feb","Mar","Apr","May","Jun",
                    "Jul","Aug","Sep","Oct","Nov","Dec"]
-    
-    years = ["2012","2013","2014","2015", "2016"]
-    
+        
     # temp in months as years increase: color becomes lighter
     q = float(df["temp_max"].quantile(1))
     df2 = df.copy()
@@ -140,30 +138,40 @@ def chart_temp_extr(df: pd.DataFrame) -> alt.Chart:
 ###################### exploration chart ###################
 
 def chart_weather_explore(df: pd.DataFrame) -> alt.Chart:
-    month_order = ["Jan","Feb","Mar","Apr","May","Jun",
-                   "Jul","Aug","Sep","Oct","Nov","Dec"]
     
-    return (
-        alt.Chart(df)
-        .transform_aggregate(
-            count="count()",
-            groupby=["month_name", "weather"]
-        )
-        .transform_window(
-            rank="rank()",
-            sort=[alt.SortField("count", order="descending")],
-            groupby=["month_name"]
-        )
-        .mark_line(point=True)
-        .encode(
-            x=alt.X("month_name:N", title="Month", sort=month_order),
-            y=alt.Y("rank:O", title="Frequency Rank", sort="descending"),
-            color=alt.Color("weather:N", title="Weather Type").scale(scheme="category10"),
-            tooltip=["weather", "month_name", "rank:O", "count:Q"]
-        )
-        .properties(
-            title="Ranking of Weather Frequency by Month",
-            width=600,
-            height=320
-        )
+    weather_types = sorted(df["weather"].unique())
+
+    w_select = alt.selection_point(
+        fields=["weather"],
+        bind=alt.binding_select(options=weather_types, name="Weather: "),
     )
+    brush = alt.selection_interval(encodings=["x"], name="Time window")
+
+    line = (
+        alt.Chart(df)
+        .mark_line()
+        .encode(
+            x=alt.X("date:T", title="Date"),
+            y=alt.Y("wind:Q", title="Daily wind levels"),
+            color=alt.Color("weather:N", title="Weather"),
+            tooltip=["date:T", "weather:N", alt.Tooltip("wind:Q", format=".1f")],
+        )
+        .add_params(w_select, brush)
+        .transform_filter(w_select)
+        .properties(height=260)
+    )
+
+    hist = (
+        alt.Chart(df)
+        .mark_bar()
+        .encode(
+            x=alt.X("wind:Q", bin=alt.Bin(maxbins=30), title="Daily wind levels"),
+            y=alt.Y("count():Q", title="Days"),
+            tooltip=[alt.Tooltip("count():Q", title="Days")],
+        )
+        .transform_filter(w_select)
+        .transform_filter(brush)
+        .properties(height=260)
+    )
+
+    return alt.vconcat(line, hist).resolve_scale(color="independent")
