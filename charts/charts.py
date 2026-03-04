@@ -158,7 +158,7 @@ def weather_explore(df: pd.DataFrame) -> alt.Chart:
         )
         .add_params(w_select, brush)
         .transform_filter(w_select)
-        .properties(height=260)
+        .properties(height=500)
     )
 
     hist = (
