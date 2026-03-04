@@ -137,7 +137,7 @@ def chart_temp_extr(df: pd.DataFrame) -> alt.Chart:
 
 ###################### exploration chart ###################
 
-def chart_weather_explore(df: pd.DataFrame) -> alt.Chart:
+def weather_explore(df: pd.DataFrame) -> alt.Chart:
     
     weather_types = sorted(df["weather"].unique())
 
